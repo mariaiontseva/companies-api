@@ -10,23 +10,17 @@ const connection = mysql.createConnection('mysql://root:FuEbybhbhPwJXtsPAqdKdXyv
 
 app.get('/api/oldest', (req, res) => {
     connection.query(
-        'SELECT * FROM companies LIMIT 1',
+        'SELECT * FROM companies ORDER BY CompanyNumber ASC LIMIT 10',
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
-            // First, let's see what columns we have
-            if (results.length > 0) {
-                const columns = Object.keys(results[0]);
-                res.json({ columns, sample: results[0] });
-            } else {
-                res.json({ error: 'No data found' });
-            }
+            res.json(results);
         }
     );
 });
 
 app.get('/api/newest', (req, res) => {
     connection.query(
-        'SELECT * FROM companies ORDER BY DateofCreation DESC LIMIT 10',
+        'SELECT * FROM companies ORDER BY CompanyNumber DESC LIMIT 10',
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);
