@@ -19,6 +19,28 @@ app.get('/api/columns', (req, res) => {
     );
 });
 
+// Get sample with all columns to see what data we have
+app.get('/api/sample', (req, res) => {
+    connection.query(
+        'SELECT * FROM companies LIMIT 1',
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
+// Check all tables
+app.get('/api/tables', (req, res) => {
+    connection.query(
+        'SHOW TABLES',
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
 app.get('/api/oldest', (req, res) => {
     connection.query(
         'SELECT * FROM companies ORDER BY CompanyNumber ASC LIMIT 5',
