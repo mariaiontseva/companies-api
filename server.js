@@ -21,7 +21,7 @@ app.get('/api/columns', (req, res) => {
 
 app.get('/api/oldest', (req, res) => {
     connection.query(
-        'SELECT * FROM companies ORDER BY CompanyNumber ASC LIMIT 10',
+        'SELECT * FROM companies ORDER BY CompanyNumber ASC LIMIT 5',
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);
@@ -31,7 +31,32 @@ app.get('/api/oldest', (req, res) => {
 
 app.get('/api/newest', (req, res) => {
     connection.query(
-        'SELECT * FROM companies ORDER BY CompanyNumber DESC LIMIT 10',
+        'SELECT * FROM companies ORDER BY CompanyNumber DESC LIMIT 5',
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
+// Add endpoints for loading more with offset
+app.get('/api/oldest/:offset', (req, res) => {
+    const offset = parseInt(req.params.offset) || 0;
+    connection.query(
+        'SELECT * FROM companies ORDER BY CompanyNumber ASC LIMIT 5 OFFSET ?',
+        [offset],
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
+app.get('/api/newest/:offset', (req, res) => {
+    const offset = parseInt(req.params.offset) || 0;
+    connection.query(
+        'SELECT * FROM companies ORDER BY CompanyNumber DESC LIMIT 5 OFFSET ?',
+        [offset],
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);
