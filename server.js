@@ -8,6 +8,17 @@ app.use(cors());
 // Your Railway MySQL URL
 const connection = mysql.createConnection('mysql://root:FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc@turntable.proxy.rlwy.net:51124/railway');
 
+// Add endpoint to check table structure
+app.get('/api/columns', (req, res) => {
+    connection.query(
+        'DESCRIBE companies',
+        (err, results) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(results);
+        }
+    );
+});
+
 app.get('/api/oldest', (req, res) => {
     connection.query(
         'SELECT * FROM companies ORDER BY CompanyNumber ASC LIMIT 10',
