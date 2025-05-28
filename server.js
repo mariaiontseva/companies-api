@@ -10,7 +10,7 @@ const connection = mysql.createConnection('mysql://root:FuEbybhbhPwJXtsPAqdKdXyv
 
 app.get('/api/oldest', (req, res) => {
     connection.query(
-        'SELECT * FROM companies ORDER BY date_of_creation ASC LIMIT 10',
+        'SELECT * FROM companies ORDER BY DateofCreation ASC LIMIT 10',
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);
@@ -20,7 +20,7 @@ app.get('/api/oldest', (req, res) => {
 
 app.get('/api/newest', (req, res) => {
     connection.query(
-        'SELECT * FROM companies ORDER BY date_of_creation DESC LIMIT 10',
+        'SELECT * FROM companies ORDER BY DateofCreation DESC LIMIT 10',
         (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);
