@@ -37,7 +37,7 @@ app.get('/api/oldest/:offset?', (req, res) => {
       'TRANSPORT': ['49%', '50%', '51%', '52%', '53%', '%TRANSPORT%'],
       'CONSTRUCTION': ['41%', '42%', '43%', '%CONSTRUCTION%', '%BUILDING%'],
       'SERVICES': ['69%', '70%', '71%', '72%', '73%', '74%', '75%', '%CONSULTING%', '%LEGAL%'],
-      'MEDIA': ['58%', '59%', '60%', '90%', '91%', '92%', '93%', '%MEDIA%', '%BROADCAST%', '%PUBLISHING%'],
+      'MEDIA': ['58%', '59%', '60%', '90%', '91%', '%MEDIA%', '%BROADCAST%', '%PUBLISHING%', '%FILM%', '%TELEVISION%', '%RADIO%'],
       'OTHER': ['%']
     };
     
@@ -88,7 +88,7 @@ app.get('/api/newest/:offset?', (req, res) => {
       'TRANSPORT': ['49%', '50%', '51%', '52%', '53%', '%TRANSPORT%'],
       'CONSTRUCTION': ['41%', '42%', '43%', '%CONSTRUCTION%', '%BUILDING%'],
       'SERVICES': ['69%', '70%', '71%', '72%', '73%', '74%', '75%', '%CONSULTING%', '%LEGAL%'],
-      'MEDIA': ['58%', '59%', '60%', '90%', '91%', '92%', '93%', '%MEDIA%', '%BROADCAST%', '%PUBLISHING%'],
+      'MEDIA': ['58%', '59%', '60%', '90%', '91%', '%MEDIA%', '%BROADCAST%', '%PUBLISHING%', '%FILM%', '%TELEVISION%', '%RADIO%'],
       'OTHER': ['%']
     };
     
