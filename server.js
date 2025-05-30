@@ -14,6 +14,34 @@ const connection = mysql.createConnection({
   database: 'railway'
 });
 
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Companies API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Database health check
+app.get('/health', (req, res) => {
+  connection.ping((err) => {
+    if (err) {
+      res.status(500).json({ 
+        status: 'ERROR', 
+        message: 'Database connection failed',
+        error: err.message 
+      });
+    } else {
+      res.json({ 
+        status: 'OK', 
+        message: 'Database connection successful',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+});
+
 // Get oldest companies with pagination and optional industry filter
 app.get('/api/oldest/:offset?', (req, res) => {
   const offset = parseInt(req.params.offset) || 0;
