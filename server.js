@@ -50,7 +50,7 @@ app.get('/api/oldest/:offset?', (req, res) => {
   queryParams.push(offset);
   
   const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
            RegAddress_PostTown, RegAddress_County, RegAddress_Country,
            SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
            Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
@@ -103,7 +103,7 @@ app.get('/api/newest/:offset?', (req, res) => {
   queryParams.push(offset);
   
   const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
            RegAddress_PostTown, RegAddress_County, RegAddress_Country,
            SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
            Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
@@ -124,7 +124,7 @@ app.get('/api/newest/:offset?', (req, res) => {
 app.get('/api/search/:query', (req, res) => {
   const searchQuery = req.params.query;
   const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
            Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
            Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
     FROM companies
@@ -140,13 +140,36 @@ app.get('/api/search/:query', (req, res) => {
   });
 });
 
+// Get companies with charges
+app.get('/api/companies-with-charges/:offset?', (req, res) => {
+  const offset = parseInt(req.params.offset) || 0;
+  
+  const query = `
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
+           RegAddress_PostTown, RegAddress_County, RegAddress_Country,
+           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
+           Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
+    FROM companies 
+    WHERE CompanyStatus = 'Active' AND Mortgages_NumMortCharges > 0
+    ORDER BY Mortgages_NumMortCharges DESC
+    LIMIT 20 OFFSET ?
+  `;
+  
+  connection.query(query, [offset], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+});
+
 // Get total company count
 app.get('/api/stats', (req, res) => {
   const query = `
     SELECT 
       COUNT(*) as total,
       COUNT(CASE WHEN CompanyStatus = 'Active' THEN 1 END) as active,
-      COUNT(CASE WHEN CompanyStatus = 'Dissolved' THEN 1 END) as dissolved
+      COUNT(CASE WHEN CompanyStatus = 'Dissolved' THEN 1 END) as dissolved,
+      COUNT(CASE WHEN CompanyStatus = 'Active' AND Mortgages_NumMortCharges > 0 THEN 1 END) as with_charges
     FROM companies
   `;
   
