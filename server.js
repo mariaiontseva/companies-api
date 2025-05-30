@@ -5,7 +5,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Your Railway MySQL connection
+// Railway MySQL connection
 const connection = mysql.createConnection({
   host: 'turntable.proxy.rlwy.net',
   port: 51124,
@@ -14,7 +14,16 @@ const connection = mysql.createConnection({
   database: 'railway'
 });
 
-// Health check endpoint
+// Test database connection
+connection.connect((err) => {
+  if (err) {
+    console.error('Database connection failed:', err.message);
+  } else {
+    console.log('✅ Connected to Railway MySQL database');
+  }
+});
+
+// Health check
 app.get('/', (req, res) => {
   res.json({ 
     status: 'OK', 
@@ -23,28 +32,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// Database health check
-app.get('/health', (req, res) => {
-  connection.ping((err) => {
-    if (err) {
-      res.status(500).json({ 
-        status: 'ERROR', 
-        message: 'Database connection failed',
-        error: err.message 
-      });
-    } else {
-      res.json({ 
-        status: 'OK', 
-        message: 'Database connection successful',
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
-});
-
-// Get oldest companies with pagination and optional industry filter
-app.get('/api/oldest/:offset?', (req, res) => {
-  const offset = parseInt(req.params.offset) || 0;
+// Get oldest companies
+app.get('/api/oldest', (req, res) => {
   const industry = req.query.industry;
   
   let whereClause = 'WHERE CompanyStatus = \'Active\' AND IncorporationDate IS NOT NULL';
@@ -52,7 +41,6 @@ app.get('/api/oldest/:offset?', (req, res) => {
   
   // Add industry filter if provided
   if (industry && industry !== 'ALL') {
-    // Map frontend industry names to SIC code patterns
     const industryPatterns = {
       'AGRICULTURE': ['01%', '02%', '03%', '10%', '11%', '%AGRICULTURE%', '%FARM%', '%FOOD%', '%CATTLE%'],
       'FINANCIAL': ['64%', '65%', '66%', '%FINANC%', '%INSURANCE%', '%BANK%'],
@@ -74,8 +62,6 @@ app.get('/api/oldest/:offset?', (req, res) => {
     whereClause += ` AND (${sicConditions})`;
     queryParams.push(...patterns);
   }
-  
-  queryParams.push(offset);
   
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
@@ -86,18 +72,20 @@ app.get('/api/oldest/:offset?', (req, res) => {
     FROM companies 
     ${whereClause}
     ORDER BY IncorporationDate ASC
-    LIMIT 5 OFFSET ?
+    LIMIT 5
   `;
   
   connection.query(query, queryParams, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error('Query error:', err);
+      return res.status(500).json({ error: err.message });
+    }
     res.json(results);
   });
 });
 
-// Get newest companies with pagination and optional industry filter
-app.get('/api/newest/:offset?', (req, res) => {
-  const offset = parseInt(req.params.offset) || 0;
+// Get newest companies
+app.get('/api/newest', (req, res) => {
   const industry = req.query.industry;
   
   let whereClause = 'WHERE CompanyStatus = \'Active\' AND IncorporationDate IS NOT NULL';
@@ -105,7 +93,6 @@ app.get('/api/newest/:offset?', (req, res) => {
   
   // Add industry filter if provided
   if (industry && industry !== 'ALL') {
-    // Map frontend industry names to SIC code patterns
     const industryPatterns = {
       'AGRICULTURE': ['01%', '02%', '03%', '10%', '11%', '%AGRICULTURE%', '%FARM%', '%FOOD%', '%CATTLE%'],
       'FINANCIAL': ['64%', '65%', '66%', '%FINANC%', '%INSURANCE%', '%BANK%'],
@@ -128,8 +115,6 @@ app.get('/api/newest/:offset?', (req, res) => {
     queryParams.push(...patterns);
   }
   
-  queryParams.push(offset);
-  
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
            RegAddress_PostTown, RegAddress_County, RegAddress_Country,
@@ -139,39 +124,20 @@ app.get('/api/newest/:offset?', (req, res) => {
     FROM companies
     ${whereClause}
     ORDER BY IncorporationDate DESC
-    LIMIT 5 OFFSET ?
+    LIMIT 5
   `;
   
   connection.query(query, queryParams, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-});
-
-// Search companies
-app.get('/api/search/:query', (req, res) => {
-  const searchQuery = req.params.query;
-  const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
-           Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
-           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
-    FROM companies
-    WHERE CompanyName LIKE ? OR CompanyNumber LIKE ?
-    ORDER BY CompanyName ASC
-    LIMIT 20
-  `;
-  
-  const searchTerm = `%${searchQuery}%`;
-  connection.query(query, [searchTerm, searchTerm], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error('Query error:', err);
+      return res.status(500).json({ error: err.message });
+    }
     res.json(results);
   });
 });
 
 // Get companies with charges
-app.get('/api/companies-with-charges/:offset?', (req, res) => {
-  const offset = parseInt(req.params.offset) || 0;
-  
+app.get('/api/companies-with-charges', (req, res) => {
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
            RegAddress_PostTown, RegAddress_County, RegAddress_Country,
@@ -181,34 +147,21 @@ app.get('/api/companies-with-charges/:offset?', (req, res) => {
     FROM companies 
     WHERE CompanyStatus = 'Active' AND Mortgages_NumMortCharges > 0
     ORDER BY Mortgages_NumMortCharges DESC
-    LIMIT 20 OFFSET ?
-  `;
-  
-  connection.query(query, [offset], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-});
-
-// Get total company count
-app.get('/api/stats', (req, res) => {
-  const query = `
-    SELECT 
-      COUNT(*) as total,
-      COUNT(CASE WHEN CompanyStatus = 'Active' THEN 1 END) as active,
-      COUNT(CASE WHEN CompanyStatus = 'Dissolved' THEN 1 END) as dissolved,
-      COUNT(CASE WHEN CompanyStatus = 'Active' AND Mortgages_NumMortCharges > 0 THEN 1 END) as with_charges
-    FROM companies
+    LIMIT 20
   `;
   
   connection.query(query, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results[0]);
+    if (err) {
+      console.error('Query error:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
   });
 });
 
 const PORT = process.env.PORT || 3000;
 console.log(`🚀 Starting Companies API server on port ${PORT}`);
-app.listen(PORT, () => {
-  console.log(`Companies API server running on port ${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Companies API server running on port ${PORT}`);
 });
