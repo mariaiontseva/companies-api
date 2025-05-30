@@ -52,7 +52,9 @@ app.get('/api/oldest/:offset?', (req, res) => {
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
            RegAddress_PostTown, RegAddress_County, RegAddress_Country,
-           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4
+           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
+           Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
     FROM companies 
     ${whereClause}
     ORDER BY IncorporationDate ASC
@@ -103,7 +105,9 @@ app.get('/api/newest/:offset?', (req, res) => {
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
            RegAddress_PostTown, RegAddress_County, RegAddress_Country,
-           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4
+           SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
+           Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
     FROM companies
     ${whereClause}
     ORDER BY IncorporationDate DESC
@@ -120,7 +124,9 @@ app.get('/api/newest/:offset?', (req, res) => {
 app.get('/api/search/:query', (req, res) => {
   const searchQuery = req.params.query;
   const query = `
-    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate
+    SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate,
+           Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
     FROM companies
     WHERE CompanyName LIKE ? OR CompanyNumber LIKE ?
     ORDER BY CompanyName ASC
