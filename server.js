@@ -180,7 +180,7 @@ app.get('/api/stats', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-console.log(`Starting server on port ${PORT}`);
+console.log(`🚀 Starting Companies API server on port ${PORT}`);
 app.listen(PORT, () => {
   console.log(`Companies API server running on port ${PORT}`);
 });
