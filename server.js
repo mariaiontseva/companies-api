@@ -65,10 +65,14 @@ app.get('/api/oldest', (req, res) => {
   
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
-           RegAddress_PostTown, RegAddress_County, RegAddress_Country,
+           RegAddress_CareOf, RegAddress_POBox, RegAddress_AddressLine1, RegAddress_AddressLine2,
+           RegAddress_PostTown, RegAddress_County, RegAddress_Country, RegAddress_PostCode,
            SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
            Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
-           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied,
+           Accounts_NextDueDate, Accounts_LastMadeUpDate, Accounts_AccountCategory,
+           ConfStmtNextDueDate, ConfStmtLastMadeUpDate,
+           PreviousName_1_CompanyName, PreviousName_2_CompanyName, PreviousName_3_CompanyName
     FROM companies 
     ${whereClause}
     ORDER BY IncorporationDate ASC
@@ -117,10 +121,14 @@ app.get('/api/newest', (req, res) => {
   
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
-           RegAddress_PostTown, RegAddress_County, RegAddress_Country,
+           RegAddress_CareOf, RegAddress_POBox, RegAddress_AddressLine1, RegAddress_AddressLine2,
+           RegAddress_PostTown, RegAddress_County, RegAddress_Country, RegAddress_PostCode,
            SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
            Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
-           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied,
+           Accounts_NextDueDate, Accounts_LastMadeUpDate, Accounts_AccountCategory,
+           ConfStmtNextDueDate, ConfStmtLastMadeUpDate,
+           PreviousName_1_CompanyName, PreviousName_2_CompanyName, PreviousName_3_CompanyName
     FROM companies
     ${whereClause}
     ORDER BY IncorporationDate DESC
@@ -140,10 +148,14 @@ app.get('/api/newest', (req, res) => {
 app.get('/api/companies-with-charges', (req, res) => {
   const query = `
     SELECT CompanyName, CompanyNumber, CompanyStatus, IncorporationDate, CompanyCategory,
-           RegAddress_PostTown, RegAddress_County, RegAddress_Country,
+           RegAddress_CareOf, RegAddress_POBox, RegAddress_AddressLine1, RegAddress_AddressLine2,
+           RegAddress_PostTown, RegAddress_County, RegAddress_Country, RegAddress_PostCode,
            SICCode_SicText_1, SICCode_SicText_2, SICCode_SicText_3, SICCode_SicText_4,
            Mortgages_NumMortCharges, Mortgages_NumMortOutstanding, 
-           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied
+           Mortgages_NumMortPartSatisfied, Mortgages_NumMortSatisfied,
+           Accounts_NextDueDate, Accounts_LastMadeUpDate, Accounts_AccountCategory,
+           ConfStmtNextDueDate, ConfStmtLastMadeUpDate,
+           PreviousName_1_CompanyName, PreviousName_2_CompanyName, PreviousName_3_CompanyName
     FROM companies 
     WHERE CompanyStatus = 'Active' AND Mortgages_NumMortCharges > 0
     ORDER BY Mortgages_NumMortCharges DESC
