@@ -5,21 +5,28 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Railway MySQL connection
-const connection = mysql.createConnection({
+// Railway MySQL connection pool
+const pool = mysql.createPool({
   host: 'turntable.proxy.rlwy.net',
   port: 51124,
   user: 'root',
   password: 'FuEbybhbhPwJXtsPAqdKdXyvbyOCxVWc',
-  database: 'railway'
+  database: 'railway',
+  connectionLimit: 10,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
+  idleTimeout: 300000,
+  queueLimit: 0
 });
 
-// Test database connection
-connection.connect((err) => {
+// Test database connection pool
+pool.getConnection((err, connection) => {
   if (err) {
-    console.error('Database connection failed:', err.message);
+    console.error('Database connection pool failed:', err.message);
   } else {
-    console.log('✅ Connected to Railway MySQL database');
+    console.log('✅ Connected to Railway MySQL database pool');
+    connection.release(); // Return connection to pool
   }
 });
 
@@ -79,7 +86,7 @@ app.get('/api/oldest', (req, res) => {
     LIMIT 5
   `;
   
-  connection.query(query, queryParams, (err, results) => {
+  pool.query(query, queryParams, (err, results) => {
     if (err) {
       console.error('Query error:', err);
       return res.status(500).json({ error: err.message });
@@ -135,7 +142,7 @@ app.get('/api/newest', (req, res) => {
     LIMIT 5
   `;
   
-  connection.query(query, queryParams, (err, results) => {
+  pool.query(query, queryParams, (err, results) => {
     if (err) {
       console.error('Query error:', err);
       return res.status(500).json({ error: err.message });
@@ -162,7 +169,7 @@ app.get('/api/companies-with-charges', (req, res) => {
     LIMIT 20
   `;
   
-  connection.query(query, (err, results) => {
+  pool.query(query, (err, results) => {
     if (err) {
       console.error('Query error:', err);
       return res.status(500).json({ error: err.message });
